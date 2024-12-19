@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Search
  *
@@ -34,6 +35,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BattlePokemonSuperSearch = void 0;
 /**
  * Backend for search UIs.
  */
@@ -77,6 +80,7 @@ var DexSearch = /** @class */ (function () {
             case 'ability': return new BattleAbilitySearch('ability', format, speciesOrSet);
             case 'type': return new BattleTypeSearch('type', format, speciesOrSet);
             case 'category': return new BattleCategorySearch('category', format, speciesOrSet);
+            case 'supersearch': return new BattlePokemonSuperSearch('pokemon', format, speciesOrSet);
         }
         return null;
     };
@@ -110,6 +114,7 @@ var DexSearch = /** @class */ (function () {
             this.dex = this.typedSearch.dex;
     };
     DexSearch.prototype.addFilter = function (entry) {
+        console.log("GABBY: adding entry - ".concat(JSON.stringify(entry)));
         if (!this.typedSearch)
             return false;
         var type = entry[0];
@@ -1283,6 +1288,368 @@ var BattlePokemonSearch = /** @class */ (function (_super) {
     };
     return BattlePokemonSearch;
 }(BattleTypedSearch));
+var BattlePokemonSuperSearch = /** @class */ (function (_super) {
+    __extends(BattlePokemonSuperSearch, _super);
+    function BattlePokemonSuperSearch() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.sortRow = ['sortpokemon', ''];
+        return _this;
+    }
+    BattlePokemonSuperSearch.prototype.getTable = function () {
+        return BattlePokedex;
+    };
+    BattlePokemonSuperSearch.prototype.getDefaultResults = function () {
+        var results = [];
+        for (var id in BattlePokedex) {
+            switch (id) {
+                case 'bulbasaur':
+                    results.push(['header', "Generation 1"]);
+                    break;
+                case 'chikorita':
+                    results.push(['header', "Generation 2"]);
+                    break;
+                case 'treecko':
+                    results.push(['header', "Generation 3"]);
+                    break;
+                case 'turtwig':
+                    results.push(['header', "Generation 4"]);
+                    break;
+                case 'victini':
+                    results.push(['header', "Generation 5"]);
+                    break;
+                case 'chespin':
+                    results.push(['header', "Generation 6"]);
+                    break;
+                case 'rowlet':
+                    results.push(['header', "Generation 7"]);
+                    break;
+                case 'grookey':
+                    results.push(['header', "Generation 8"]);
+                    break;
+                case 'sprigatito':
+                    results.push(['header', "Generation 9"]);
+                    break;
+                case 'missingno':
+                    results.push(['header', "Glitch"]);
+                    break;
+                case 'syclar':
+                    results.push(['header', "CAP"]);
+                    break;
+                case 'pikachucosplay':
+                    continue;
+            }
+            results.push(['pokemon', id]);
+        }
+        return results;
+    };
+    BattlePokemonSuperSearch.prototype.getBaseResults = function () {
+        var _a, _b, _c, _d, _e, _f, _g;
+        var format = this.format;
+        if (!format)
+            return this.getDefaultResults();
+        var isVGCOrBS = format.startsWith('battlespot') || format.startsWith('bss') ||
+            format.startsWith('battlestadium') || format.startsWith('vgc');
+        var isHackmons = format.includes('hackmons') || format.endsWith('bh');
+        var isDoublesOrBS = isVGCOrBS || ((_a = this.formatType) === null || _a === void 0 ? void 0 : _a.includes('doubles'));
+        var dex = this.dex;
+        var table = BattleTeambuilderTable;
+        if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
+            table = table['gen' + dex.gen];
+        }
+        else if (isVGCOrBS) {
+            table = table['gen' + dex.gen + 'vgc'];
+        }
+        else if (dex.gen === 9 && isHackmons && !this.formatType) {
+            table = table['bh'];
+        }
+        else if (table['gen' + dex.gen + 'doubles'] && dex.gen > 4 &&
+            this.formatType !== 'letsgo' && this.formatType !== 'bdspdoubles' &&
+            this.formatType !== 'ssdlc1doubles' && this.formatType !== 'predlcdoubles' &&
+            this.formatType !== 'svdlc1doubles' && !((_b = this.formatType) === null || _b === void 0 ? void 0 : _b.includes('natdex')) &&
+            (format.includes('doubles') || format.includes('triples') ||
+                format === 'freeforall' || format.startsWith('ffa') ||
+                format === 'partnersincrime')) {
+            table = table['gen' + dex.gen + 'doubles'];
+            isDoublesOrBS = true;
+        }
+        else if (dex.gen < 9 && !this.formatType) {
+            table = table['gen' + dex.gen];
+        }
+        else if ((_c = this.formatType) === null || _c === void 0 ? void 0 : _c.startsWith('bdsp')) {
+            table = table['gen8' + this.formatType];
+        }
+        else if (this.formatType === 'letsgo') {
+            table = table['gen7letsgo'];
+        }
+        else if (this.formatType === 'bw1') {
+            table = table['gen5bw1'];
+        }
+        else if (this.formatType === 'natdex') {
+            table = table['gen' + dex.gen + 'natdex'];
+        }
+        else if (this.formatType === 'metronome') {
+            table = table['gen' + dex.gen + 'metronome'];
+        }
+        else if (this.formatType === 'nfe') {
+            table = table['gen' + dex.gen + 'nfe'];
+        }
+        else if (this.formatType === 'lc') {
+            table = table['gen' + dex.gen + 'lc'];
+        }
+        else if ((_d = this.formatType) === null || _d === void 0 ? void 0 : _d.startsWith('ssdlc1')) {
+            if (this.formatType.includes('doubles')) {
+                table = table['gen8dlc1doubles'];
+            }
+            else {
+                table = table['gen8dlc1'];
+            }
+        }
+        else if ((_e = this.formatType) === null || _e === void 0 ? void 0 : _e.startsWith('predlc')) {
+            if (this.formatType.includes('doubles')) {
+                table = table['gen9predlcdoubles'];
+            }
+            else if (this.formatType.includes('natdex')) {
+                table = table['gen9predlcnatdex'];
+            }
+            else {
+                table = table['gen9predlc'];
+            }
+        }
+        else if ((_f = this.formatType) === null || _f === void 0 ? void 0 : _f.startsWith('svdlc1')) {
+            if (this.formatType.includes('doubles')) {
+                table = table['gen9dlc1doubles'];
+            }
+            else if (this.formatType.includes('natdex')) {
+                table = table['gen9dlc1natdex'];
+            }
+            else {
+                table = table['gen9dlc1'];
+            }
+        }
+        else if (this.formatType === 'stadium') {
+            table = table['gen' + dex.gen + 'stadium' + (dex.gen > 1 ? dex.gen : '')];
+        }
+        if (!table.tierSet) {
+            table.tierSet = table.tiers.map(function (r) {
+                if (typeof r === 'string')
+                    return ['pokemon', r];
+                return [r[0], r[1]];
+            });
+            table.tiers = null;
+        }
+        var tierSet = table.tierSet;
+        var slices = table.formatSlices;
+        if (format === 'ubers' || format === 'uber' || format === 'ubersuu' || format === 'nationaldexdoubles') {
+            tierSet = tierSet.slice(slices.Uber);
+        }
+        else if (isVGCOrBS || (isHackmons && dex.gen === 9 && !this.formatType)) {
+            if (format.endsWith('series13') || isHackmons) {
+                // Show Mythicals
+            }
+            else if (format === 'vgc2010' || format === 'vgc2016' || format.startsWith('vgc2019') ||
+                format === 'vgc2022' || format.endsWith('regg')) {
+                tierSet = tierSet.slice(slices["Restricted Legendary"]);
+            }
+            else {
+                tierSet = tierSet.slice(slices.Regular);
+            }
+            if (format.endsWith('regh')) {
+                tierSet = tierSet.filter(function (_a) {
+                    var type = _a[0], id = _a[1];
+                    var tags = Dex.species.get(Dex.species.get(id).baseSpecies).tags;
+                    return !tags.includes('Sub-Legendary') && !tags.includes('Paradox') &&
+                        // The game does not classify these as Paradox Pokemon (Booster Energy can be knocked off)
+                        !['gougingfire', 'ironboulder', 'ironcrown', 'ragingbolt'].includes(id);
+                });
+            }
+        }
+        else if (format === 'ou')
+            tierSet = tierSet.slice(slices.OU);
+        else if (format === 'uu')
+            tierSet = tierSet.slice(slices.UU);
+        else if (format === 'ru')
+            tierSet = tierSet.slice(slices.RU || slices.UU);
+        else if (format === 'nu')
+            tierSet = tierSet.slice(slices.NU || slices.RU || slices.UU);
+        else if (format === 'pu')
+            tierSet = tierSet.slice(slices.PU || slices.NU);
+        else if (format === 'zu' && dex.gen === 5)
+            tierSet = tierSet.slice(slices.PU || slices.NU);
+        else if (format === 'zu')
+            tierSet = tierSet.slice(slices.ZU || slices.PU || slices.NU);
+        else if (format === 'lc' || format === 'lcuu' || format.startsWith('lc') || (format !== 'caplc' && format.endsWith('lc')))
+            tierSet = tierSet.slice(slices.LC);
+        else if (format === 'cap' || format.endsWith('cap')) {
+            tierSet = tierSet.slice(0, slices.AG || slices.Uber).concat(tierSet.slice(slices.OU));
+        }
+        else if (format === 'caplc') {
+            tierSet = tierSet.slice(slices['CAP LC'], slices.AG || slices.Uber).concat(tierSet.slice(slices.LC));
+        }
+        else if (format === 'anythinggoes' || format.endsWith('ag') || format.startsWith('ag')) {
+            tierSet = tierSet.slice(slices.AG);
+        }
+        else if (isHackmons && (dex.gen < 9 || this.formatType === 'natdex')) {
+            tierSet = tierSet.slice(slices.AG || slices.Uber);
+        }
+        else if (format === 'monotype' || format.startsWith('monothreat'))
+            tierSet = tierSet.slice(slices.Uber);
+        else if (format === 'doublesubers')
+            tierSet = tierSet.slice(slices.DUber);
+        else if (format === 'doublesou' && dex.gen > 4)
+            tierSet = tierSet.slice(slices.DOU);
+        else if (format === 'doublesuu')
+            tierSet = tierSet.slice(slices.DUU);
+        else if (format === 'doublesnu')
+            tierSet = tierSet.slice(slices.DNU || slices.DUU);
+        else if (((_g = this.formatType) === null || _g === void 0 ? void 0 : _g.startsWith('bdsp')) || this.formatType === 'letsgo' || this.formatType === 'stadium') {
+            tierSet = tierSet.slice(slices.Uber);
+        }
+        else if (!isDoublesOrBS) {
+            tierSet = __spreadArray(__spreadArray(__spreadArray(__spreadArray([], tierSet.slice(slices.OU, slices.UU), true), tierSet.slice(slices.AG, slices.Uber), true), tierSet.slice(slices.Uber, slices.OU), true), tierSet.slice(slices.UU), true);
+        }
+        else {
+            tierSet = __spreadArray(__spreadArray(__spreadArray([], tierSet.slice(slices.DOU, slices.DUU), true), tierSet.slice(slices.DUber, slices.DOU), true), tierSet.slice(slices.DUU), true);
+        }
+        if (format === 'ubersuu' && table.ubersUUBans) {
+            tierSet = tierSet.filter(function (_a) {
+                var type = _a[0], id = _a[1];
+                if (id in table.ubersUUBans)
+                    return false;
+                return true;
+            });
+        }
+        if (format === 'doubles' && this.formatType === 'natdex' && table.ndDoublesBans) {
+            tierSet = tierSet.filter(function (_a) {
+                var type = _a[0], id = _a[1];
+                if (id in table.ndDoublesBans)
+                    return false;
+                return true;
+            });
+        }
+        if (format === '35pokes' && table.thirtyfivePokes) {
+            tierSet = tierSet.filter(function (_a) {
+                var type = _a[0], id = _a[1];
+                if (id in table.thirtyfivePokes)
+                    return true;
+                return false;
+            });
+        }
+        if (dex.gen >= 5) {
+            if ((format === 'monotype' || format.startsWith('monothreat')) && table.monotypeBans) {
+                tierSet = tierSet.filter(function (_a) {
+                    var type = _a[0], id = _a[1];
+                    if (id in table.monotypeBans)
+                        return false;
+                    return true;
+                });
+            }
+        }
+        if (format === 'zu' && dex.gen === 5 && table.gen5zuBans) {
+            tierSet = tierSet.filter(function (_a) {
+                var type = _a[0], id = _a[1];
+                if (id in table.gen5zuBans)
+                    return false;
+                return true;
+            });
+        }
+        // Filter out Gmax Pokemon from standard tier selection
+        if (!/^(battlestadium|vgc|doublesubers)/g.test(format)) {
+            tierSet = tierSet.filter(function (_a) {
+                var type = _a[0], id = _a[1];
+                if (type === 'header' && id === 'DUber by technicality')
+                    return false;
+                if (type === 'pokemon')
+                    return !id.endsWith('gmax');
+                return true;
+            });
+        }
+        return tierSet;
+    };
+    BattlePokemonSuperSearch.prototype.filter = function (row, filters) {
+        if (!filters)
+            return true;
+        if (row[0] !== 'pokemon')
+            return true;
+        var species = this.dex.species.get(row[1]);
+        var validTypes = [];
+        for (var _i = 0, filters_2 = filters; _i < filters_2.length; _i++) {
+            var _a = filters_2[_i], filterType = _a[0], value = _a[1];
+            // GABBY: This is where filters are applied
+            // object looks like [ ["type","Water"] ]
+            switch (filterType) {
+                case 'type':
+                    validTypes.push(value);
+                    break;
+                case 'egggroup':
+                    if (species.eggGroups[0] !== value && species.eggGroups[1] !== value)
+                        return false;
+                    break;
+                case 'tier':
+                    if (this.getTier(species) !== value)
+                        return false;
+                    break;
+                case 'ability':
+                    if (!Dex.hasAbility(species, value))
+                        return false;
+                    break;
+                case 'move':
+                    if (!this.canLearn(species.id, value))
+                        return false;
+            }
+        }
+        // evaluate types separately because this is complicated
+        // console.log(`GABBY this is the filters object: ${JSON.stringify(validTypes)}`);
+        // console.log(`GABBY this is the species object: ${JSON.stringify(species)}`);
+        if (validTypes.length > 0) {
+            if (!validTypes.includes(species.types[0]))
+                return false;
+            // second type may not be defined
+            if (species.types[1] !== undefined && !validTypes.includes(species.types[1]))
+                return false;
+        }
+        return true;
+    };
+    BattlePokemonSuperSearch.prototype.sort = function (results, sortCol, reverseSort) {
+        var _this = this;
+        var sortOrder = reverseSort ? -1 : 1;
+        if (['hp', 'atk', 'def', 'spa', 'spd', 'spe'].includes(sortCol)) {
+            return results.sort(function (_a, _b) {
+                var rowType1 = _a[0], id1 = _a[1];
+                var rowType2 = _b[0], id2 = _b[1];
+                var stat1 = _this.dex.species.get(id1).baseStats[sortCol];
+                var stat2 = _this.dex.species.get(id2).baseStats[sortCol];
+                return (stat2 - stat1) * sortOrder;
+            });
+        }
+        else if (sortCol === 'bst') {
+            return results.sort(function (_a, _b) {
+                var rowType1 = _a[0], id1 = _a[1];
+                var rowType2 = _b[0], id2 = _b[1];
+                var base1 = _this.dex.species.get(id1).baseStats;
+                var base2 = _this.dex.species.get(id2).baseStats;
+                var bst1 = base1.hp + base1.atk + base1.def + base1.spa + base1.spd + base1.spe;
+                var bst2 = base2.hp + base2.atk + base2.def + base2.spa + base2.spd + base2.spe;
+                if (_this.dex.gen === 1) {
+                    bst1 -= base1.spd;
+                    bst2 -= base2.spd;
+                }
+                return (bst2 - bst1) * sortOrder;
+            });
+        }
+        else if (sortCol === 'name') {
+            return results.sort(function (_a, _b) {
+                var rowType1 = _a[0], id1 = _a[1];
+                var rowType2 = _b[0], id2 = _b[1];
+                var name1 = id1;
+                var name2 = id2;
+                return (name1 < name2 ? -1 : name1 > name2 ? 1 : 0) * sortOrder;
+            });
+        }
+        throw new Error("invalid sortcol");
+    };
+    return BattlePokemonSuperSearch;
+}(BattleTypedSearch));
+exports.BattlePokemonSuperSearch = BattlePokemonSuperSearch;
 var BattleAbilitySearch = /** @class */ (function (_super) {
     __extends(BattleAbilitySearch, _super);
     function BattleAbilitySearch() {
@@ -1367,8 +1734,8 @@ var BattleAbilitySearch = /** @class */ (function (_super) {
         if (row[0] !== 'ability')
             return true;
         var ability = this.dex.abilities.get(row[1]);
-        for (var _i = 0, filters_2 = filters; _i < filters_2.length; _i++) {
-            var _a = filters_2[_i], filterType = _a[0], value = _a[1];
+        for (var _i = 0, filters_3 = filters; _i < filters_3.length; _i++) {
+            var _a = filters_3[_i], filterType = _a[0], value = _a[1];
             switch (filterType) {
                 case 'pokemon':
                     if (!Dex.hasAbility(this.dex.species.get(value), ability.name))
@@ -1448,8 +1815,8 @@ var BattleItemSearch = /** @class */ (function (_super) {
         if (row[0] !== 'ability')
             return true;
         var ability = this.dex.abilities.get(row[1]);
-        for (var _i = 0, filters_3 = filters; _i < filters_3.length; _i++) {
-            var _a = filters_3[_i], filterType = _a[0], value = _a[1];
+        for (var _i = 0, filters_4 = filters; _i < filters_4.length; _i++) {
+            var _a = filters_4[_i], filterType = _a[0], value = _a[1];
             switch (filterType) {
                 case 'pokemon':
                     if (!Dex.hasAbility(this.dex.species.get(value), ability.name))
@@ -1960,8 +2327,8 @@ var BattleMoveSearch = /** @class */ (function (_super) {
         if (row[0] !== 'move')
             return true;
         var move = this.dex.moves.get(row[1]);
-        for (var _i = 0, filters_4 = filters; _i < filters_4.length; _i++) {
-            var _a = filters_4[_i], filterType = _a[0], value = _a[1];
+        for (var _i = 0, filters_5 = filters; _i < filters_5.length; _i++) {
+            var _a = filters_5[_i], filterType = _a[0], value = _a[1];
             switch (filterType) {
                 case 'type':
                     if (move.type !== value)

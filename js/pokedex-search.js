@@ -13,6 +13,7 @@ var PokedexSearchPanel = Panels.Panel.extend({
 		'click': 'click',
 		'click .result a': 'clickResult',
 		'click .filter': 'removeFilter',
+		'change .checkbox': 'clickTypeCheckbox',
 		'mouseover .result a': 'hoverlink'
 	},
 	activeLink: null,
@@ -21,15 +22,23 @@ var PokedexSearchPanel = Panels.Panel.extend({
 		var questionIndex = fragment.indexOf('?');
 		if (fragment === 'moves') fragment = 'moves/';
 		if (fragment === 'pokemon') fragment = 'pokemon/';
+		if (fragment === 'supersearch') fragment = 'supersearch/';
 		if (questionIndex >= 0) fragment = fragment.slice(0, questionIndex);
 		var buf = '<div class="pfx-body"><form class="pokedex">';
 		buf += '<h1><a href="/" data-target="replace">Pok&eacute;dex</a></h1>';
 		buf += '<ul class="tabbar centered" style="margin-bottom: 18px"><li><button class="button nav-first' + (fragment === '' ? ' cur' : '') + '" value="">Search</button></li>';
 		buf += '<li><button class="button' + (fragment === 'pokemon/' ? ' cur' : '') + '" value="pokemon/">Pok&eacute;mon</button></li>';
-		buf += '<li><button class="button nav-last' + (fragment === 'moves/' ? ' cur' : '') + '" value="moves/">Moves</button></li></ul>';
+		buf += '<li><button class="button' + (fragment === 'moves/' ? ' cur' : '') + '" value="moves/">Moves</button></li>';
+		buf += '<li><button class="button nav-last' + (fragment === 'supersearch/' ? ' cur' : '') + '" value="supersearch/">Super Search!</button></li></ul>';
 		buf += '<div class="searchboxwrapper"><input class="textbox searchbox" type="search" name="q" value="' + Dex.escapeHTML(this.$('.searchbox').val() || '') + '" autocomplete="off" autofocus placeholder="Search Pok&eacute;mon, moves, abilities, items, types, or more" /></div>';
 		if (fragment === '') {
 			buf += '<p class="buttonbar"><button class="button"><strong>Pok&eacute;dex Search</strong></button> <button name="lucky" class="button">I\'m Feeling Lucky</button></p>';
+		} else if (fragment === 'supersearch/') {
+			// add custom filter logic here...
+			// <img src="https://play.pokemonshowdown.com/sprites/types/Water.png" >
+			buf +='<ul><label><li><img src="/images/types/bug.png" alt="Bug" height="14" width="32" class="pixelated"><input class="checkbox" name="type" type="checkbox" value="type:Bug" data-target="push" data-entry="type|Bug"></label></li></ul>';
+			buf +='<ul><label><li><img alt="Dark" src="/images/types/dark.png" title="Dark"><input class="checkbox" name="type" type="checkbox" value="type:Dark" data-target="push" data-entry="type|Dark"></label></li></ul>';
+			buf +='<ul><label><li><img alt="Dragon" src="/images/types/dragon.png" title="Dragon"><input class="checkbox" name="type" type="checkbox" value="type:Dragon" data-target="push" data-entry="type|Dragon"></label></li></ul>';
 		}
 		buf += '</form>';
 		buf += '<div class="results"></div></div>';
@@ -51,6 +60,10 @@ var PokedexSearchPanel = Panels.Panel.extend({
 				search.setType('move');
 				$searchbox.attr('placeholder', 'Search moves OR filter by type, category, pokemon');
 				this.$('.buttonbar').remove();
+			} else if (fragment === 'supersearch/') {
+				search.setType('supersearch');
+				$searchbox.attr('placeholder', 'This is Gabby\'s work! :)');
+				this.$('.buttonbar').remove();
 			}
 			this.search.externalFilter = true;
 		} else {
@@ -69,7 +82,6 @@ var PokedexSearchPanel = Panels.Panel.extend({
 		this.$searchbox.focus();
 	},
 	updateFilters: function() {
-		// this.search.externalFilter = true;
 		var buf = '';
 		if (this.search.qType === 'pokemon') {
 			buf = '<button class="filter noclear" value=":">Pokémon</button> ';
@@ -227,6 +239,7 @@ var PokedexSearchPanel = Panels.Panel.extend({
 			alert(['That\'s pretty cool.','Your mom\'s feeling lucky.','I see.','If you feel lucky for more than four hours, perhaps you should see a doctor.'][Math.floor(Math.random()*4)]);
 			return;
 		}
+		// if (e.target.tagName === '')
 		var scrollLoc = this.$el.scrollTop();
 		this.$searchbox.focus();
 		this.$el.scrollTop(scrollLoc);
@@ -238,6 +251,23 @@ var PokedexSearchPanel = Panels.Panel.extend({
 			this.$searchbox.val('');
 			this.find('');
 			return;
+		}
+	},
+	clickTypeCheckbox: function(e) {
+		if (e.currentTarget.checked) {
+			// check action (add filter)
+			if (this.search.addFilter(e.currentTarget)) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				this.$searchbox.val('');
+				this.find('');
+				return;
+			}
+		} else {
+			// uncheck action (remove filter)
+			console.log(`GABBY click type checkbox function called to remove: ${e.currentTarget.value}`);
+			this.search.removeFilter(e);
+			this.updateFilters();
 		}
 	},
 	hoverlink: function(e) {
