@@ -33,12 +33,6 @@ var PokedexSearchPanel = Panels.Panel.extend({
 		buf += '<div class="searchboxwrapper"><input class="textbox searchbox" type="search" name="q" value="' + Dex.escapeHTML(this.$('.searchbox').val() || '') + '" autocomplete="off" autofocus placeholder="Search Pok&eacute;mon, moves, abilities, items, types, or more" /></div>';
 		if (fragment === '') {
 			buf += '<p class="buttonbar"><button class="button"><strong>Pok&eacute;dex Search</strong></button> <button name="lucky" class="button">I\'m Feeling Lucky</button></p>';
-		} else if (fragment === 'supersearch/') {
-			// add custom filter logic here...
-			// <img src="https://play.pokemonshowdown.com/sprites/types/Water.png" >
-			buf +='<ul><label><li><img src="/images/types/bug.png" alt="Bug" height="14" width="32" class="pixelated"><input class="checkbox" name="type" type="checkbox" value="type:Bug" data-target="push" data-entry="type|Bug"></label></li></ul>';
-			buf +='<ul><label><li><img alt="Dark" src="/images/types/dark.png" title="Dark"><input class="checkbox" name="type" type="checkbox" value="type:Dark" data-target="push" data-entry="type|Dark"></label></li></ul>';
-			buf +='<ul><label><li><img alt="Dragon" src="/images/types/dragon.png" title="Dragon"><input class="checkbox" name="type" type="checkbox" value="type:Dragon" data-target="push" data-entry="type|Dragon"></label></li></ul>';
 		}
 		buf += '</form>';
 		buf += '<div class="results"></div></div>';
@@ -61,8 +55,8 @@ var PokedexSearchPanel = Panels.Panel.extend({
 				$searchbox.attr('placeholder', 'Search moves OR filter by type, category, pokemon');
 				this.$('.buttonbar').remove();
 			} else if (fragment === 'supersearch/') {
-				search.setType('supersearch');
-				$searchbox.attr('placeholder', 'This is Gabby\'s work! :)');
+				search.setType('supersearch', 'vgc2024regh');
+				$searchbox.attr('placeholder', 'This mode will search for all Pokemon with only the types filtered.');
 				this.$('.buttonbar').remove();
 			}
 			this.search.externalFilter = true;
@@ -265,7 +259,6 @@ var PokedexSearchPanel = Panels.Panel.extend({
 			}
 		} else {
 			// uncheck action (remove filter)
-			console.log(`GABBY click type checkbox function called to remove: ${e.currentTarget.value}`);
 			this.search.removeFilter(e);
 			this.updateFilters();
 		}

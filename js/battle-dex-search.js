@@ -114,7 +114,6 @@ var DexSearch = /** @class */ (function () {
             this.dex = this.typedSearch.dex;
     };
     DexSearch.prototype.addFilter = function (entry) {
-        console.log("GABBY: adding entry - ".concat(JSON.stringify(entry)));
         if (!this.typedSearch)
             return false;
         var type = entry[0];
@@ -1213,11 +1212,10 @@ var BattlePokemonSearch = /** @class */ (function (_super) {
         var validTypes = [];
         for (var _i = 0, filters_1 = filters; _i < filters_1.length; _i++) {
             var _a = filters_1[_i], filterType = _a[0], value = _a[1];
-            // GABBY: This is where filters are applied
-            // object looks like [ ["type","Water"] ]
             switch (filterType) {
                 case 'type':
-                    validTypes.push(value);
+                    if (species.types[0] !== value && species.types[1] !== value)
+                        return false;
                     break;
                 case 'egggroup':
                     if (species.eggGroups[0] !== value && species.eggGroups[1] !== value)
@@ -1235,16 +1233,6 @@ var BattlePokemonSearch = /** @class */ (function (_super) {
                     if (!this.canLearn(species.id, value))
                         return false;
             }
-        }
-        // evaluate types separately because this is complicated
-        // console.log(`GABBY this is the filters object: ${JSON.stringify(validTypes)}`);
-        // console.log(`GABBY this is the species object: ${JSON.stringify(species)}`);
-        if (validTypes.length > 0) {
-            if (!validTypes.includes(species.types[0]))
-                return false;
-            // second type may not be defined
-            if (species.types[1] !== undefined && !validTypes.includes(species.types[1]))
-                return false;
         }
         return true;
     };
@@ -1574,8 +1562,6 @@ var BattlePokemonSuperSearch = /** @class */ (function (_super) {
         var validTypes = [];
         for (var _i = 0, filters_2 = filters; _i < filters_2.length; _i++) {
             var _a = filters_2[_i], filterType = _a[0], value = _a[1];
-            // GABBY: This is where filters are applied
-            // object looks like [ ["type","Water"] ]
             switch (filterType) {
                 case 'type':
                     validTypes.push(value);
@@ -1597,9 +1583,6 @@ var BattlePokemonSuperSearch = /** @class */ (function (_super) {
                         return false;
             }
         }
-        // evaluate types separately because this is complicated
-        // console.log(`GABBY this is the filters object: ${JSON.stringify(validTypes)}`);
-        // console.log(`GABBY this is the species object: ${JSON.stringify(species)}`);
         if (validTypes.length > 0) {
             if (!validTypes.includes(species.types[0]))
                 return false;

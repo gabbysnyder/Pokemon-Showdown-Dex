@@ -1128,11 +1128,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const species = this.dex.species.get(row[1]);
 		var validTypes = [];
 		for (const [filterType, value] of filters) {
-			// GABBY: This is where filters are applied
-			// object looks like [ ["type","Water"] ]
+
 			switch (filterType) {
 			case 'type':
-				validTypes.push(value);
+				if (species.types[0] !== value && species.types[1] !== value) return false;
 				break;
 			case 'egggroup':
 				if (species.eggGroups[0] !== value && species.eggGroups[1] !== value) return false;
@@ -1147,18 +1146,6 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				if (!this.canLearn(species.id, value as ID)) return false;
 			}
 		}
-
-		// evaluate types separately because this is complicated
-		// console.log(`GABBY this is the filters object: ${JSON.stringify(validTypes)}`);
-		// console.log(`GABBY this is the species object: ${JSON.stringify(species)}`);
-
-		if (validTypes.length > 0) {
-			if (!validTypes.includes(species.types[0])) return false;
-
-			// second type may not be defined
-			if (species.types[1] !== undefined && !validTypes.includes(species.types[1])) return false;
-		}
-
 		return true;
 	}
 	sort(results: SearchRow[], sortCol: string, reverseSort?: boolean) {
@@ -1426,8 +1413,6 @@ export class BattlePokemonSuperSearch extends BattleTypedSearch<'pokemon'> {
 		const species = this.dex.species.get(row[1]);
 		var validTypes = [];
 		for (const [filterType, value] of filters) {
-			// GABBY: This is where filters are applied
-			// object looks like [ ["type","Water"] ]
 			switch (filterType) {
 				case 'type':
 					validTypes.push(value);
